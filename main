@@ -1,27 +1,24 @@
 local Players = game:GetService("Players")
-local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer
 local hidden = false
-
-pcall(function()
-    StarterGui:SetCore("SendNotification", {
-        Title = "Script",
-        Text = "Loaded successfully",
-        Duration = 3
-    })
-end)
 
 local gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
 gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local btn = Instance.new("TextButton")
-btn.Size = UDim2.new(0,20,0,20)
-btn.Position = UDim2.new(1,-45,0,15)
+btn.Size = UDim2.new(0,28,0,28)
+btn.Position = UDim2.new(1,-50,0,15)
 btn.Text = ""
-btn.BackgroundTransparency = 0.5
+btn.BackgroundTransparency = 0.2
 btn.BackgroundColor3 = Color3.fromRGB(255,80,80)
+btn.BorderSizePixel = 0
 btn.Parent = gui
+
+-- bikin rounded
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(1,0)
+corner.Parent = btn
 
 local function togglePlayers(hide)
     for _, plr in ipairs(Players:GetPlayers()) do

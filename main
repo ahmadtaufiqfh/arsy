@@ -1,0 +1,6 @@
+local cfg = getgenv().ARSY
+if not cfg or not cfg.Enabled then return end
+
+print("[ARSY] Core running")
+
+-- logic utama kamu taruh di sini

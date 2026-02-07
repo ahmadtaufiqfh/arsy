@@ -1,0 +1,15 @@
+if _G.ARSY_LOADED then return end
+_G.ARSY_LOADED = true
+
+local BASE = "https://raw.githubusercontent.com/ahmadtaufiqfh/arsy/refs/heads/main/"
+
+local function load(name)
+    local src = game:HttpGet(BASE .. name)
+    return loadstring(src)
+end
+
+load("config")()
+load("ui")()
+load("main")()
+
+print("[ARSY] Hub Loaded")

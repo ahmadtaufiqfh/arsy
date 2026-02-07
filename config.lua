@@ -1,7 +1,11 @@
+-- Toggle Billboard Visibility System
+print("Toggle System Initialized")
+
 local isHidden = false
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
+-- Create UI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "ToggleUI"
 screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
@@ -23,25 +27,26 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(1, 0)
 corner.Parent = toggleBtn
 
-
-local function toggleAllBillboards(hide)
-    if hide then
-        for _, workspaceObj in pairs(workspace:GetDescendants()) do
-            if workspaceObj:IsA("BillboardGui") then
-                if not workspaceObj:GetAttribute("WasEnabled") then
-                    workspaceObj:SetAttribute("WasEnabled", workspaceObj.Enabled)
+-- Simple toggle function
+local function toggleAllPlayerBillboards(hide)
+    -- Get all characters
+    local characters = workspace:FindFirstChild("Characters")
+    if not characters then return end
+    
+    -- Toggle all Billboards in Characters folder
+    for _, billboard in pairs(characters:GetDescendants()) do
+        if billboard:IsA("BillboardGui") then
+            if hide then
+                if not billboard:GetAttribute("WasEnabled") then
+                    billboard:SetAttribute("WasEnabled", billboard.Enabled)
                 end
-                workspaceObj.Enabled = false
-            end
-        end
-    else
-        for _, workspaceObj in pairs(workspace:GetDescendants()) do
-            if workspaceObj:IsA("BillboardGui") then
-                local wasEnabled = workspaceObj:GetAttribute("WasEnabled")
+                billboard.Enabled = false
+            else
+                local wasEnabled = billboard:GetAttribute("WasEnabled")
                 if wasEnabled ~= nil then
-                    workspaceObj.Enabled = wasEnabled
+                    billboard.Enabled = wasEnabled
                 else
-                    workspaceObj.Enabled = true
+                    billboard.Enabled = true
                 end
             end
         end
@@ -52,42 +57,47 @@ end
 local function updateButton()
     if isHidden then
         toggleBtn.BackgroundColor3 = Color3.fromRGB(80, 255, 80)
-        print("✅ Semua Billboard: DISABLED")
+        print("✅ Player Billboard: DISABLED")
     else
         toggleBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-        print("✅ Semua Billboard: ENABLED")
+        print("✅ Player Billboard: ENABLED")
     end
 end
 
 -- Button click handler
 toggleBtn.MouseButton1Click:Connect(function()
     isHidden = not isHidden
-    toggleAllBillboards(isHidden)
+    toggleAllPlayerBillboards(isHidden)
     updateButton()
 end)
 
--- Monitor for new BillboardGuis
-workspace.DescendantAdded:Connect(function(descendant)
-    if isHidden and descendant:IsA("BillboardGui") then
-        descendant.Enabled = false
-    end
-end)
+-- Monitor for new Billboards in Characters folder
+local function monitorCharacters()
+    local characters = workspace:WaitForChild("Characters")
+    characters.DescendantAdded:Connect(function(descendant)
+        if isHidden and descendant:IsA("BillboardGui") then
+            descendant.Enabled = false
+        end
+    end)
+end
+
+spawn(monitorCharacters)
 
 -- Auto refresh
 spawn(function()
     while task.wait(3) do
         if isHidden then
-            toggleAllBillboards(true)
+            toggleAllPlayerBillboards(true)
         end
     end
 end)
 
 -- Initialize
 updateButton()
-toggleAllBillboards(isHidden)
+toggleAllPlayerBillboards(isHidden)
 
 print("🎯 System Ready")
-print("• 🔴 RED = Semua Billboard Visible")
-print("• 🟢 GREEN = Semua Billboard Hidden")
-print("• Termasuk semua player")
+print("• 🔴 RED = Player Billboard Visible")
+print("• 🟢 GREEN = Player Billboard Hidden")
+print("• Hanya billboard di folder Characters")
 print("• Click circle to toggle")

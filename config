@@ -1,0 +1,9 @@
+getgenv().ARSY = {
+    Enabled = true,
+    Keybind = "RightShift",
+
+    Nametag = {
+        HideName = true,
+        HideLevel = true
+    }
+}

@@ -1,11 +1,7 @@
--- Toggle Name/Level Visibility System
-print("Toggle System Initialized")
-
 local isHidden = false
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Create UI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "ToggleUI"
 screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
@@ -27,10 +23,9 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(1, 0)
 corner.Parent = toggleBtn
 
--- Simple toggle function - no loops
+
 local function toggleAllBillboards(hide)
     if hide then
-        -- Disable all BillboardGuis in the game
         for _, workspaceObj in pairs(workspace:GetDescendants()) do
             if workspaceObj:IsA("BillboardGui") then
                 if not workspaceObj:GetAttribute("WasEnabled") then
@@ -40,7 +35,6 @@ local function toggleAllBillboards(hide)
             end
         end
     else
-        -- Enable all BillboardGuis that were disabled
         for _, workspaceObj in pairs(workspace:GetDescendants()) do
             if workspaceObj:IsA("BillboardGui") then
                 local wasEnabled = workspaceObj:GetAttribute("WasEnabled")

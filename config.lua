@@ -1,5 +1,5 @@
 -- Toggle Name/Level Visibility System
-print("Toggle Visibility System Initialized")
+print("Toggle System Initialized")
 
 local isHidden = false
 local Players = game:GetService("Players")
@@ -27,51 +27,27 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(1, 0)
 corner.Parent = toggleBtn
 
--- Function to toggle visibility
-local function toggleNameLevelUI(hide)
-    local allPlayerNames = {}
-    
-    for _, player in pairs(Players:GetPlayers()) do
-        allPlayerNames[player.Name] = true
-    end
-    
-    for _, player in pairs(Players:GetPlayers()) do
-        if player.Character then
-            for _, gui in pairs(player.Character:GetDescendants()) do
-                if gui:IsA("BillboardGui") then
-                    local containsNameOrLevel = false
-                    
-                    for _, textObj in pairs(gui:GetDescendants()) do
-                        if textObj:IsA("TextLabel") and textObj.Text then
-                            local text = textObj.Text
-                            
-                            if allPlayerNames[text] then
-                                containsNameOrLevel = true
-                                break
-                            end
-                            
-                            if text:match("^[Ll][Vv]%.?%s*%d+") then
-                                containsNameOrLevel = true
-                                break
-                            end
-                        end
-                    end
-                    
-                    if containsNameOrLevel then
-                        if hide then
-                            if not gui:GetAttribute("WasEnabled") then
-                                gui:SetAttribute("WasEnabled", gui.Enabled)
-                            end
-                            gui.Enabled = false
-                        else
-                            local wasEnabled = gui:GetAttribute("WasEnabled")
-                            if wasEnabled ~= nil then
-                                gui.Enabled = wasEnabled
-                            else
-                                gui.Enabled = true
-                            end
-                        end
-                    end
+-- Simple toggle function - no loops
+local function toggleAllBillboards(hide)
+    if hide then
+        -- Disable all BillboardGuis in the game
+        for _, workspaceObj in pairs(workspace:GetDescendants()) do
+            if workspaceObj:IsA("BillboardGui") then
+                if not workspaceObj:GetAttribute("WasEnabled") then
+                    workspaceObj:SetAttribute("WasEnabled", workspaceObj.Enabled)
+                end
+                workspaceObj.Enabled = false
+            end
+        end
+    else
+        -- Enable all BillboardGuis that were disabled
+        for _, workspaceObj in pairs(workspace:GetDescendants()) do
+            if workspaceObj:IsA("BillboardGui") then
+                local wasEnabled = workspaceObj:GetAttribute("WasEnabled")
+                if wasEnabled ~= nil then
+                    workspaceObj.Enabled = wasEnabled
+                else
+                    workspaceObj.Enabled = true
                 end
             end
         end
@@ -82,78 +58,42 @@ end
 local function updateButton()
     if isHidden then
         toggleBtn.BackgroundColor3 = Color3.fromRGB(80, 255, 80)
-        print("Visibility: HIDDEN")
+        print("✅ Semua Billboard: DISABLED")
     else
         toggleBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-        print("Visibility: VISIBLE")
+        print("✅ Semua Billboard: ENABLED")
     end
 end
 
 -- Button click handler
 toggleBtn.MouseButton1Click:Connect(function()
     isHidden = not isHidden
-    toggleNameLevelUI(isHidden)
+    toggleAllBillboards(isHidden)
     updateButton()
 end)
 
--- Handle character changes
-local function handleCharacter(character)
-    wait(1)
-    
-    if isHidden then
-        local names = {}
-        for _, p in pairs(Players:GetPlayers()) do
-            names[p.Name] = true
-        end
-        
-        for _, gui in pairs(character:GetDescendants()) do
-            if gui:IsA("BillboardGui") then
-                local isTarget = false
-                
-                for _, textObj in pairs(gui:GetDescendants()) do
-                    if textObj:IsA("TextLabel") and textObj.Text then
-                        local text = textObj.Text
-                        if names[text] or text:match("^[Ll][Vv]%.?") then
-                            isTarget = true
-                            break
-                        end
-                    end
-                end
-                
-                if isTarget then
-                    gui.Enabled = false
-                end
-            end
-        end
+-- Monitor for new BillboardGuis
+workspace.DescendantAdded:Connect(function(descendant)
+    if isHidden and descendant:IsA("BillboardGui") then
+        descendant.Enabled = false
     end
-end
-
--- Monitor local player character
-if LocalPlayer.Character then
-    handleCharacter(LocalPlayer.Character)
-end
-
-LocalPlayer.CharacterAdded:Connect(handleCharacter)
-
--- Monitor other players
-Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function(character)
-        handleCharacter(character)
-    end)
 end)
 
 -- Auto refresh
 spawn(function()
     while task.wait(3) do
         if isHidden then
-            toggleNameLevelUI(true)
+            toggleAllBillboards(true)
         end
     end
 end)
 
 -- Initialize
 updateButton()
-toggleNameLevelUI(isHidden)
+toggleAllBillboards(isHidden)
 
-print("System Ready")
-print("Red = Visible | Green = Hidden")
+print("🎯 System Ready")
+print("• 🔴 RED = Semua Billboard Visible")
+print("• 🟢 GREEN = Semua Billboard Hidden")
+print("• Termasuk semua player")
+print("• Click circle to toggle")

@@ -1,9 +1,95 @@
-getgenv().ARSY = {
-    Enabled = true,
-    Keybind = "RightShift",
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local LocalPlayer = Players.LocalPlayer
 
-    Nametag = {
-        HideName = true,
-        HideLevel = true
-    }
-}
+local enabled = false
+local connections = {}
+
+-- ===== GUI BUTTON =====
+local gui = Instance.new("ScreenGui")
+gui.ResetOnSpawn = false
+gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local btn = Instance.new("TextButton")
+btn.Size = UDim2.new(0,28,0,28)
+btn.Position = UDim2.new(1,-50,0,15)
+btn.Text = ""
+btn.BackgroundTransparency = 0.2
+btn.BackgroundColor3 = Color3.fromRGB(255,80,80)
+btn.BorderSizePixel = 0
+btn.Parent = gui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(1,0)
+corner.Parent = btn
+
+-- ===== FUNCTION =====
+local function isPlayerName(text)
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if text == plr.Name or text == plr.DisplayName then
+            return true
+        end
+    end
+    return false
+end
+
+local function blurLabel(label)
+    if not enabled then return end
+    if label:IsA("TextLabel") and label.Text and label.Text ~= "" then
+        if isPlayerName(label.Text) then
+            label.Text = string.rep("█", #label.Text)
+        end
+    end
+end
+
+local function scan(container)
+    for _, obj in ipairs(container:GetDescendants()) do
+        blurLabel(obj)
+    end
+end
+
+local function connectContainer(container)
+    scan(container)
+
+    local conn = container.DescendantAdded:Connect(function(obj)
+        task.wait()
+        blurLabel(obj)
+    end)
+
+    table.insert(connections, conn)
+end
+
+local function enableBlur()
+    local playerList = CoreGui:FindFirstChild("PlayerList", true)
+    local chat = CoreGui:FindFirstChild("Chat", true)
+
+    if playerList then
+        connectContainer(playerList)
+    end
+
+    if chat then
+        connectContainer(chat)
+    end
+end
+
+local function disableBlur()
+    for _, conn in ipairs(connections) do
+        conn:Disconnect()
+    end
+    connections = {}
+end
+
+-- ===== TOGGLE BUTTON =====
+btn.MouseButton1Click:Connect(function()
+    enabled = not enabled
+
+    btn.BackgroundColor3 = enabled
+        and Color3.fromRGB(80,255,80)
+        or Color3.fromRGB(255,80,80)
+
+    if enabled then
+        enableBlur()
+    else
+        disableBlur()
+    end
+end)
